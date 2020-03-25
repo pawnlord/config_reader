@@ -1,4 +1,6 @@
 #define MAX_SIZE 255
+#ifndef CONFIG_READER_HEADER
+#define CONFIG_READER_HEADER
 typedef struct {
 	/* EOL is also a word, for easier reading */
 	char words[MAX_SIZE][MAX_SIZE]; 
@@ -37,3 +39,4 @@ int dir_get_last_attr(config cfg, char fieldname[], char attr[], char val[][50])
 void set_cfg_field(config cfg, char begin, char end); 
 
 void set_eol(config cfg, char eol);
+#endif

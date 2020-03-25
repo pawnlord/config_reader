@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "config_reader.h"
+#include "../header/config_reader.h"
 
 int is_field(char* str) {
 	int last = 0;
@@ -34,7 +34,9 @@ int file_reader(char* filename, char* buffer) {
 	fclose(fp);
 }
 
-int config_reader(char* buffer, config* cfg) {
+int config_reader(char* filename, config* cfg) {
+	char buffer[1000] = "";
+	file_reader(filename, buffer);
 	int word_counter = 0;
 	int current_word = 0;
 	int i = 0;
@@ -66,7 +68,6 @@ int config_reader(char* buffer, config* cfg) {
 			word_counter++;
 		}
 	}
-	printf("Values: %d, %d, %d, %d\n", word_counter, current_word, cfg->words[current_word][word_counter], MAX_SIZE);
 	word_counter = 0;
 	current_word++;
 }
@@ -76,7 +77,6 @@ int get_field(config cfg, char* field_name, char field[][255]) {
 	strcat(full_field_name, "[");
 	strcat(full_field_name, field_name);
 	strcat(full_field_name, "]");
-	printf("%s\n", full_field_name);
 	int i = 0;
 	int found = 0;
 	for(i = 0; strcmp(cfg.words[i], ""); i++) {
@@ -103,14 +103,12 @@ int get_attr(config cfg, char field[][255], char attr[], char val[][50][50]) {
 	int current_val_number = 0;
 	int found = 0;
 	for(int i = 0; strcmp(field[i], ""); i++) {
-		printf("%s, %d, %d, %d\n", field[i], i, strcmp(field[i], new_line), strcmp(field[i], attr));
 		if(strcmp(field[i], attr) == 0) {
 			found = 1;
 			i+=1;
 			int curr_i = i;
 			for(; strcmp(field[i], "") && strcmp(field[i], new_line); i++) {
 				strcpy(val[current_val_number][current_val], field[i]);
-				printf("\t%s, %d, %d\n", val[current_val_number][current_val], current_val_number, current_val);
 				current_val++;
 			}
 			i = curr_i;
@@ -125,14 +123,12 @@ int get_first_attr(config cfg, char field[][255], char attr[], char val[][50]) {
 	int current_val  = 0;
 	int found = 0;
 	for(int i = 0; strcmp(field[i], ""); i++) {
-		printf("%s, %d, %d, %d\n", field[i], i, strcmp(field[i], new_line), strcmp(field[i], attr));
 		if(strcmp(field[i], attr) == 0) {
 			found = 1;
 			i+=1;
 			int curr_i = i;
 			for(; strcmp(field[i], "") && strcmp(field[i], new_line); i++) {
 				strcpy(val[current_val], field[i]);
-				printf("\t%s, %d\n", val[current_val], current_val);
 				current_val++;
 			}
 			break;
@@ -145,7 +141,6 @@ int get_last_attr(config cfg, char field[][255], char attr[], char val[][50]) {
 	int current_val  = 0;
 	int found = 0;
 	for(int i = 0; strcmp(field[i], ""); i++) {
-		printf("%s, %d, %d, %d\n", field[i], i, strcmp(field[i], new_line), strcmp(field[i], attr));
 		if(strcmp(field[i], attr) == 0) {
 			found = 1;
 			i+=1;
@@ -155,7 +150,6 @@ int get_last_attr(config cfg, char field[][255], char attr[], char val[][50]) {
 			}
 			for(; strcmp(field[i], "") && strcmp(field[i], new_line); i++) {
 				strcpy(val[current_val], field[i]);
-				printf("\t%s, %d\n", val[current_val], current_val);
 				current_val++;
 			}
 			i = curr_i;
