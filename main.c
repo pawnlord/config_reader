@@ -15,6 +15,7 @@ int main(void) {
 		}
 		printf("%d: %s\n", i, cfg.words[i]);
 	}
+	printf("\n\n\n\n\n\n\n\n");
 	char field1[255][255] = {""};
 	int b = get_field(cfg, "FIELD2", field1);
 	printf("BBBB: %d\n", b);
@@ -22,16 +23,14 @@ int main(void) {
 		printf("%d: %s\n", i, field1[i]);
 	}
 	int a = get_field(cfg, "FIELD1", field1);
-	printf("AAAA: %d\n", a);
 	for(int i = 0; strcmp(field1[i], ""); i++) {
 		if(field1[i][0] == '\n'){
 			printf("\\n");
 		}
 		printf("%d: %s\n", i, field1[i]);
 	}
-	char val[10][50][50];
-	get_attr(cfg, field1, "MAX", val);
-	printf("Max: %s\n", field1[4]);
-	printf("Max: ", val[0][0]);
+	char val[10][50] = {""};
+	dir_get_last_attr(cfg, "FIELD1", "MIN", val);
+	printf("Max: %s\n", val[0]);
 	return 0;
 }
