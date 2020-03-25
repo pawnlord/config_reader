@@ -26,10 +26,10 @@ CURRENCY Euro
 
 ## code
 The code I would say is a bit more tricky.  
-First, you have to make a config struct and define an EOL  
+First, you have to make a config struct and setup  
 ```  
 config cfg;  
-cfg.eol = '\n'; // if you have a different EOL, change it here  
+auto_cfg_setup(cfg);  
 ```  
 next, you have to read into the config with the file name of your config.
 ```

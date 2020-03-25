@@ -176,8 +176,23 @@ int dir_get_last_attr(config cfg, char fieldname[], char attr[], char val[][50])
 }
 
 void set_cfg_field(config* cfg, char begin, char end) {
-	cfg.begin = begin;
-	cfg.end = end;
+	cfg->begin_field = begin;
+	cfg->end_field = end;
 }; 
 
-void set_cfg_eol(config cfg, char eol);
+void set_cfg_eol(config* cfg, char eol) {
+	cfg->eol= eol;
+}; 
+
+void auto_cfg_setup(config* cfg) {
+	set_cfg_field(cfg, '[', ']');
+	set_cfg_eol(cfg, '\n');
+}
+
+void cfg_setup(config* cfg, char eol, char begin, char end) {
+	set_cfg_field(cfg, begin, end);
+	set_cfg_eol(cfg, eol);
+}
+int main(){
+	
+}
