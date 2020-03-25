@@ -174,3 +174,10 @@ int dir_get_last_attr(config cfg, char fieldname[], char attr[], char val[][50])
 	get_field(cfg, fieldname, field);
 	get_last_attr(cfg, field, attr, val);
 }
+
+void set_cfg_field(config* cfg, char begin, char end) {
+	cfg.begin = begin;
+	cfg.end = end;
+}; 
+
+void set_cfg_eol(config cfg, char eol);
