@@ -38,5 +38,5 @@ int dir_get_last_attr(config cfg, char fieldname[], char attr[], char val[][50])
 
 void set_cfg_field(config cfg, char begin, char end); 
 
-void set_eol(config cfg, char eol);
+void set_cfg_eol(config cfg, char eol);
 #endif
