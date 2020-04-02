@@ -96,13 +96,13 @@ void cfg_setup(config* cfg, char eol, char begin, char end);
 
 void auto_cfg_setup(config* cfg);
 
+int save_config(config* cfg, char filename[]);
+
+/* Unimplemented, but coming */
 int edit_field_value(config* cfg, char field[][255], char valname[], char new_val[][50]);
 
 int change_field(config* cfg, char field[][255], char new_field[][255]);
 
-int save_config(config* cfg, char filename[]);
-
-/* Unimplemented, but coming */
 int dir_edit_field_value(config* cfg, char fieldname[], char valname[], char new_val[][50]);
 
 int dir_change_field(config* cfg, char fieldname[], char new_field[][255]);
