@@ -90,8 +90,6 @@ int dir_get_first_attr(config cfg, char fieldname[], char attr[], char val[][50]
 
 int dir_get_last_attr(config cfg, char fieldname[], char attr[], char val[][50]);
 
-void set_cfg_field(config* cfg, char begin, char end); 
-
 void set_cfg_eol(config* cfg, char eol);
 
 void cfg_setup(config* cfg, char eol, char begin, char end);
@@ -104,8 +102,11 @@ int change_field(config* cfg, char field[][255], char new_field[][255]);
 
 int save_config(config* cfg, char filename[]);
 
+/* Unimplemented, but coming */
 int dir_edit_field_value(config* cfg, char fieldname[], char valname[], char new_val[][50]);
 
 int dir_change_field(config* cfg, char fieldname[], char new_field[][255]);
+
+void set_cfg_field(config* cfg, char begin, char end); 
 
 ```
