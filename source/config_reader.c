@@ -23,12 +23,13 @@ int file_reader(char* filename, char* buffer) {
 	FILE* fp = fopen(filename, "r");
 	char c = 0;
 	int i = 0;
+	c = fgetc((FILE*)fp);
 	// repeat until c is EOF
 	while(c != EOF )
 	{
-		c = fgetc((FILE*)fp);
 		buffer[i] = c;
 		i++;
+		c = fgetc((FILE*)fp);
 	}
 	buffer[i] = 0;
 	fclose(fp);
@@ -193,6 +194,32 @@ void cfg_setup(config* cfg, char eol, char begin, char end) {
 	set_cfg_field(cfg, begin, end);
 	set_cfg_eol(cfg, eol);
 }
+
+int save_config(config* cfg, char filename[]){
+	FILE* fp = fopen(filename, "w");
+	char  eol_str[2] = {cfg->eol, 0};
+	char* copy_word = malloc(sizeof(cfg->words[0]));
+	for(int i = 0; strcmp(cfg->words[i], ""); i++){
+		if(strcmp(cfg->words[i], eol_str) != 0) {
+			strcat(strcpy(copy_word, cfg->words[i]), " ");
+		} else {
+			strcpy(copy_word, cfg->words[i]);
+		}
+		printf(copy_word);
+		
+		if(fputs(copy_word, fp) == EOF){
+			perror("FAILED TO WRITE CONFIG TO ");
+			perror(filename);
+			return 0;
+		}
+	}
+	fclose(fp);
+	return 1;
+}
+
 int main(){
-	
+	config cfg;
+	auto_cfg_setup(&cfg);
+	config_reader("original", &cfg);
+	save_config(&cfg, "config.cfg");
 }

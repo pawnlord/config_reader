@@ -46,4 +46,18 @@ void cfg_setup(config* cfg, char eol, char begin, char end);
 /* setup with default values */
 void auto_cfg_setup(config* cfg);
 
+/* edit a config */
+/* in field, change all values named valname to new_val*/
+int edit_field_value(config* cfg, char field[][255], char valname[], char new_val[][50]);
+
+int change_field(config* cfg, char field[][255], char new_field[][255]);
+
+int save_config(config* cfg, char filename[]);
+
+/* direct versions where it applies */
+/* in field, change all values named valname to new_val*/
+int dir_edit_field_value(config* cfg, char fieldname[], char valname[], char new_val[][50]);
+
+int dir_change_field(config* cfg, char fieldname[], char new_field[][255]);
+
 #endif
