@@ -3,6 +3,58 @@
 #include <stdlib.h>
 #include "../header/config_reader.h"
 
+void init_str(char** str, int dim){
+	*str = malloc(sizeof(char)*dim);
+	
+	for(int i = 0; i < dim; i++){
+		(*str)[i] = 0;
+	}
+
+}
+void free_str(char** str){
+	free(*str);
+}
+void init_strptr(char*** strptr, int dim1, int dim2) {
+	*strptr = malloc(sizeof(char*)*dim1);
+	for(int i = 0; i < dim1; i++){
+		(*strptr)[i] = malloc(sizeof(char)*dim2);
+		for(int j = 0; j < dim2; j++){
+			(*strptr)[i][j] = 0;
+		}
+	}
+}
+void free_strptr(char*** strptr, int dim1){
+	for(int i = 0; i < dim1; i++){
+		free((*strptr)[i]);
+	}
+	free((*strptr));
+}
+
+void init_strptrptr(char**** strptrptr, int dim1, int dim2, int dim3){
+	*strptrptr = malloc(sizeof(char**)*dim1);
+	for(int i = 0; i < dim1; i++){
+		(*strptrptr)[i] = malloc(sizeof(char*)*dim2);
+		for(int j = 0; j < dim2; j++){
+			(*strptrptr)[i][j] = malloc(sizeof(char)*dim3);
+			for(int k = 0; k < dim3; k++){
+					
+				(*strptrptr)[i][j][k] = 0;
+			}
+		}
+	}
+}
+
+void free_strptrptr(char**** strptrptr, int dim1, int dim2){
+	for(int i = 0; i < dim1; i++){
+		for(int j = 0; j < dim2; j++){
+			free((*strptrptr)[i][j]);
+		}
+		free((*strptrptr)[i]);
+	}
+	free((*strptrptr));
+}
+
+
 int is_field(char* str) {
 	int last = 0;
 	if(str[0] != '[') {
@@ -36,16 +88,16 @@ int file_reader(char* filename, char* buffer) {
 }
 
 int config_reader(char* filename, config* cfg) {
-	char buffer[1000] = "";
+	char* buffer;
+	init_str(&buffer, 1000);
 	file_reader(filename, buffer);
+	init_strptr(&cfg->words, MAX_SIZE, MAX_SIZE);
 	int word_counter = 0;
 	int current_word = 0;
+	char* eol_str;
+	init_str(&eol_str, 2);
+	eol_str[0] = cfg->eol;
 	int i = 0;
-	for(i = 0; i < MAX_SIZE; i++){
-		for(int j = 0; j < MAX_SIZE; j++){
-			cfg->words[i][j] = 0;
-		}
-	}
 	for(i = 0; buffer[i] != 0; i++) {
 		if(buffer[i] == ' ') {
 			/* add array for next word */
@@ -59,7 +111,6 @@ int config_reader(char* filename, config* cfg) {
 				word_counter = 0;
 				current_word++;
 			}
-			char eol_str[2] = {cfg->eol, 0};
 			strcpy(cfg->words[current_word], eol_str);
 			/* add array for next word */
 			word_counter = 0;
@@ -71,10 +122,13 @@ int config_reader(char* filename, config* cfg) {
 	}
 	word_counter = 0;
 	current_word++;
+	free_str(&buffer);
+	free_str(&eol_str);
 }
 
-int get_field(config cfg, char* field_name, char field[][255]) {
-	char full_field_name[255] = "";
+int get_field(config cfg, char* field_name, char** field) {
+	char* full_field_name;
+	init_str(&full_field_name, 50);
 	strcat(full_field_name, "[");
 	strcat(full_field_name, field_name);
 	strcat(full_field_name, "]");
@@ -95,11 +149,14 @@ int get_field(config cfg, char* field_name, char field[][255]) {
 		strcpy(field[index], cfg.words[i]);
 		index++;
 	}
+	free_str(&full_field_name);
 	return 1;
 }
 
-int get_attr(config cfg, char field[][255], char attr[], char val[][50][50]) {
-	char new_line[2] = {cfg.eol, 0};
+int get_attr(config cfg, char** field, char* attr, char*** val) {
+	char* new_line;
+	init_str(&new_line, 2);
+	new_line[0] = cfg.eol;
 	int current_val  = 0;
 	int current_val_number = 0;
 	int found = 0;
@@ -117,10 +174,13 @@ int get_attr(config cfg, char field[][255], char attr[], char val[][50][50]) {
 			current_val_number++;
 		}
 	}
+	free_str(&new_line);
 	return found;
 }
-int get_first_attr(config cfg, char field[][255], char attr[], char val[][50]) {
-	char new_line[2] = {cfg.eol, 0};
+int get_first_attr(config cfg, char** field, char* attr, char** val) {
+	char* new_line;
+	init_str(&new_line, 2);
+	new_line[0] = cfg.eol;
 	int current_val  = 0;
 	int found = 0;
 	for(int i = 0; strcmp(field[i], ""); i++) {
@@ -135,10 +195,13 @@ int get_first_attr(config cfg, char field[][255], char attr[], char val[][50]) {
 			break;
 		}
 	}
+	free_str(&new_line);
 	return found;
 }
-int get_last_attr(config cfg, char field[][255], char attr[], char val[][50]) {
-	char new_line[2] = {cfg.eol, 0};
+int get_last_attr(config cfg, char** field, char* attr, char** val) {
+	char* new_line;
+	init_str(&new_line, 2);
+	new_line[0] = cfg.eol;
 	int current_val  = 0;
 	int found = 0;
 	for(int i = 0; strcmp(field[i], ""); i++) {
@@ -157,23 +220,30 @@ int get_last_attr(config cfg, char field[][255], char attr[], char val[][50]) {
 			current_val = 0;
 		}
 	}
+	free_str(&new_line);
 	return found;
 }
-int dir_get_attr(config cfg, char fieldname[], char attr[], char val[][50][50]) {
-	char field[100][255] = {""};
+int dir_get_attr(config cfg, char* fieldname, char* attr, char*** val) {
+	char** field;
+	init_strptr(&field, MAX_SIZE, MAX_SIZE);
 	get_field(cfg, fieldname, field);
 	get_attr(cfg, field, attr, val);
+	free_strptr(&field, MAX_SIZE);
 }
 
-int dir_get_first_attr(config cfg, char fieldname[], char attr[], char val[][50]) {
-	char field[100][255] = {""};
+int dir_get_first_attr(config cfg, char* fieldname, char* attr, char** val) {
+	char** field;
+	init_strptr(&field, MAX_SIZE, MAX_SIZE);
 	get_field(cfg, fieldname, field);
 	get_first_attr(cfg, field, attr, val);
+	free_strptr(&field, MAX_SIZE);
 }
-int dir_get_last_attr(config cfg, char fieldname[], char attr[], char val[][50]) {
-	char field[100][255] = {""};
+int dir_get_last_attr(config cfg, char* fieldname, char* attr, char** val) {
+	char** field;
+	init_strptr(&field, MAX_SIZE, MAX_SIZE);
 	get_field(cfg, fieldname, field);
 	get_last_attr(cfg, field, attr, val);
+	free_strptr(&field, MAX_SIZE);
 }
 
 void set_cfg_field(config* cfg, char begin, char end) {
@@ -195,9 +265,12 @@ void cfg_setup(config* cfg, char eol, char begin, char end) {
 	set_cfg_eol(cfg, eol);
 }
 
-int save_config(config* cfg, char filename[]){
+
+int save_config(config* cfg, char* filename){
 	FILE* fp = fopen(filename, "w");
-	char  eol_str[2] = {cfg->eol, 0};
+	char* eol_str;
+	init_str(&eol_str, 2);
+	eol_str[0] = cfg->eol;
 	char* copy_word = malloc(sizeof(cfg->words[0]));
 	for(int i = 0; strcmp(cfg->words[i], ""); i++){
 		if(strcmp(cfg->words[i], eol_str) != 0) {
@@ -213,13 +286,35 @@ int save_config(config* cfg, char filename[]){
 			return 0;
 		}
 	}
+	free_str(&eol_str);
 	fclose(fp);
 	return 1;
 }
-
+/*TEST*/
 int main(){
 	config cfg;
 	auto_cfg_setup(&cfg);
-	config_reader("original", &cfg);
-	save_config(&cfg, "config.cfg");
+	config_reader("config.cfg", &cfg);
+	char** field;
+	init_strptr(&field, MAX_SIZE, MAX_SIZE);
+	char*** val;
+	init_strptrptr(&val, 20, 10, 50);
+	char** fval;
+	init_strptr(&fval, 10, 50);
+	char** lval;
+	init_strptr(&lval, 10, 50);
+	get_field(cfg, "FIELD1", field);
+	printf("FIELD1: \n");
+	for(int i = 0; strcmp(field[i], ""); i++) {
+		printf("%s ", field[i]);
+	}
+	printf("attr MIN: \n");
+	dir_get_attr(cfg, "FIELD1", "MIN", val);
+	for(int i = 0; strcmp(val[i][0], ""); i++) {
+		for(int j = 0; strcmp(val[i][j], ""); j++) {
+			printf("%d: %s ", j, val[i][j]);
+		}
+		printf("\n");
+	}
+	save_config(&cfg, "new.cfg");
 }
