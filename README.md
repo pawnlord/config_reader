@@ -100,9 +100,9 @@ void auto_cfg_setup(config* cfg);
 int save_config(config* cfg, char* filename);
 
 /* Unimplemented, but coming! */
-int edit_field_attr(config* cfg, char* fieldname, char* attrname, char** new_val);
+int set_field_attr(config* cfg, char* fieldname, char* attrname, char** new_val);
 
-int change_field(config* cfg, char* fieldname, char** new_field);
+int set_field(config* cfg, char* fieldname, char** new_field);
 
 void set_cfg_field(config* cfg, char begin, char end); 
 

@@ -48,9 +48,9 @@ void auto_cfg_setup(config* cfg);
 
 /* edit a config, all are direct */
 /* in field, change all values named valname to new_val */
-int edit_field_attr(config* cfg, char* fieldname, char* attrname, char** new_val);
+int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val);
 
-int change_field(config* cfg, char* fieldname, char** new_field);
+int set_field(config* cfg, char* field_name, char** new_field);
 
 int save_config(config* cfg, char* filename);
 

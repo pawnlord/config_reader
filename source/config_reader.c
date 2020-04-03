@@ -54,6 +54,26 @@ void free_strptrptr(char**** strptrptr, int dim1, int dim2){
 	free((*strptrptr));
 }
 
+void insert_string_array(char** originalp, char** newp, int index, int originalsize, int newsize){
+	char** original = originalp;
+	char** new = newp;
+	char** copy = malloc(sizeof(char*)*originalsize);
+	int original_index = index;
+	int copy_index = 0;
+	for(; strcmp(original[index], ""); index++){
+		strcpy(copy[copy_index], original[index]);
+		copy_index++;
+	}
+	index = original_index;
+	for(int i = 0; strcmp(new[i], ""); i++){
+		strcpy(original[index], new[i]);
+		index++;
+	}
+	for(int i = 0; i < copy_index; i++){
+		strcpy(original[index], copy[i]);
+		index++;	
+	}
+}
 
 int is_field(char* str) {
 	int last = 0;
@@ -271,7 +291,7 @@ int save_config(config* cfg, char* filename){
 	char* eol_str;
 	init_str(&eol_str, 2);
 	eol_str[0] = cfg->eol;
-	char* copy_word = malloc(sizeof(cfg->words[0]));
+	char* copy_word = malloc(MAX_SIZE*sizeof(char));
 	for(int i = 0; strcmp(cfg->words[i], ""); i++){
 		if(strcmp(cfg->words[i], eol_str) != 0) {
 			strcat(strcpy(copy_word, cfg->words[i]), " ");
@@ -286,10 +306,66 @@ int save_config(config* cfg, char* filename){
 			return 0;
 		}
 	}
-	free_str(&eol_str);
+	//free_str(&eol_str);
 	fclose(fp);
 	return 1;
 }
+
+int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
+	char* full_field_name = "";
+	init_str(&full_field_name, 50);
+	strcat(full_field_name, "[");
+	strcat(full_field_name, field_name);
+	strcat(full_field_name, "]");
+	int i = 0;
+	int found = 0;
+	for(i = 0; strcmp(cfg->words[i], ""); i++) {
+		if(strcmp(cfg->words[i], full_field_name) == 0) {
+			i+=2; /* two to go down a line */
+			found = 1;
+			break;
+		}
+	}
+	if(found == 0) {
+		perror("COULD NOT FIND FIELD ");
+		perror(full_field_name);
+		return 0;
+	}
+	char** fieldp = (cfg->words)+i; /* pointer to field for ease of use */
+	char* new_line;
+	init_str(&new_line, 2);
+	new_line[0] = cfg->eol;
+	new_line[1] = 0;
+	int current_val  = 0;
+	int current_val_number = 0;
+	found = 0;
+	for(i = 0; strcmp(fieldp[i], "") && !is_field(fieldp[i]); i++) {
+		if(strcmp(fieldp[i], attr) == 0) {
+			found = 1;
+			i+=1;
+			int curr_i = i;
+			int curr_new_val = 0;
+			for(; strcmp(fieldp[i], "") && strcmp(fieldp[i], new_line) && !is_field(fieldp[i]); i++) {
+				strcpy(fieldp[i], new_val[curr_new_val]);
+				curr_new_val++;
+			}
+			if(strcmp(new_val[curr_new_val], "")) { /* we need to insert values now! */
+				insert_string_array(fieldp, new_val+curr_new_val, i, MAX_SIZE, 50);
+			}
+			i = curr_i;
+			current_val = 0;
+			current_val_number++;
+		}
+	}
+	if(found == 0){
+		perror("COULD NOT FIND VALUE IN ");
+		perror(full_field_name);
+		return 0;
+	}
+	free_str(&full_field_name);
+	free_str(&new_line);
+}
+
 /*TEST
 int main(){
 	config cfg;
@@ -316,6 +392,18 @@ int main(){
 		}
 		printf("\n");
 	}
+	char** new_val;
+	init_strptr(&new_val, 4, 50);
+	new_val[0] = "10";
+	new_val[1] = "sad";
+	new_val[2] = "dad";
+	set_field_attr(&cfg, "FIELD1", "MIN", new_val);
+	for(int i = 0; strcmp(cfg.words[i], ""); i++) {
+		printf("%s ", cfg.words[i]);
+	}
+	
 	save_config(&cfg, "new.cfg");
-}
-*/
+	printf("HELP");
+	free_strptr(&cfg.words, MAX_SIZE);
+	return 0;
+}*/
