@@ -290,7 +290,7 @@ int save_config(config* cfg, char* filename){
 	fclose(fp);
 	return 1;
 }
-/*TEST*/
+/*TEST
 int main(){
 	config cfg;
 	auto_cfg_setup(&cfg);
@@ -318,3 +318,4 @@ int main(){
 	}
 	save_config(&cfg, "new.cfg");
 }
+*/
