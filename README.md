@@ -1,4 +1,5 @@
 
+
 # config_reader  
 This is a more personal project for when I want to read config files, something I have had to do on a case by case basis before.  
   
@@ -38,12 +39,14 @@ config_reader("config.cfg", cfg); // read file "config.cfg" into cfg
 ```  
 If you want a specific field, although unnecessary for getting attributes, you can get it like  
 ```  c
-char field[255][255] = {""}; // make sure field is completely empty. field also must have the second size be 255  
+char** field; // make sure field is completely empty. all values should be set to 0.
+/* code to make it empty . . . */
 get_field(cfg, "FIELD1", field); // from config cfg, put contents under "[FIELD1]" in the config file into field  
 ```  
 To read this field, use one of these commands:  
 ``` c 
-char vals[50][50][50] = {{""}}; // last 2 must be 50  
+char*** vals;
+/* code to make it empty . . . */ 
 get_attr(cfg, field, "MIN", vals) // From field, using EOL from cfg, find all values of MIN, put all instances of min with each value into vals
 ```   
 Sometimes you just want one for either readability or memory reasons, for that you can get either the first or last using
@@ -68,27 +71,25 @@ so, use that as you will
 
 # reference sheet
 This is all functions for quick reference!
-This is pretty much what you will find in the .h file.
+This is pretty much what you will find in the header file.
 ```c
-int is_field(char* str);
-
 int file_reader(char* filename, char* buffer);
 
 int config_reader(char* buffer, config* cfg);
 
-int get_field(config cfg, char* field_name, char field[][255]);
+int get_field(config cfg, char* field_name, char** field); 
 
-int get_attr(config cfg, char field[][255], char attr[], char val[][50][50]);
+int get_attr(config cfg, char** field, char* attr, char*** val); 
 
-int get_first_attr(config cfg, char field[][255], char attr[], char val[][50]);
+int get_first_attr(config cfg, char** field, char* attr, char** val); 
 
-int get_last_attr(config cfg, char field[][255], char attr[], char val[][50]);
+int get_last_attr(config cfg, char** field, char* attr, char** val);
 
-int dir_get_attr(config cfg, char field[], char attr[], char val[][50][50]);
+int dir_get_attr(config cfg, char* field, char* attr, char*** val);
 
-int dir_get_first_attr(config cfg, char fieldname[], char attr[], char val[][50]);
+int dir_get_first_attr(config cfg, char* fieldname, char* attr, char** val);
 
-int dir_get_last_attr(config cfg, char fieldname[], char attr[], char val[][50]);
+int dir_get_last_attr(config cfg, char* fieldname, char* attr, char** val);
 
 void set_cfg_eol(config* cfg, char eol);
 
@@ -96,16 +97,12 @@ void cfg_setup(config* cfg, char eol, char begin, char end);
 
 void auto_cfg_setup(config* cfg);
 
-int save_config(config* cfg, char filename[]);
+int save_config(config* cfg, char* filename);
 
-/* Unimplemented, but coming */
-int edit_field_value(config* cfg, char field[][255], char valname[], char new_val[][50]);
+/* Unimplemented, but coming! */
+int edit_field_attr(config* cfg, char* fieldname, char* attrname, char** new_val);
 
-int change_field(config* cfg, char field[][255], char new_field[][255]);
-
-int dir_edit_field_value(config* cfg, char fieldname[], char valname[], char new_val[][50]);
-
-int dir_change_field(config* cfg, char fieldname[], char new_field[][255]);
+int change_field(config* cfg, char* fieldname, char** new_field);
 
 void set_cfg_field(config* cfg, char begin, char end); 
 
