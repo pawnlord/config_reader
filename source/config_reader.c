@@ -54,10 +54,11 @@ void free_strptrptr(char**** strptrptr, int dim1, int dim2){
 	free((*strptrptr));
 }
 
-void insert_string_array(char** originalp, char** newp, int index, int originalsize, int newsize){
+void insert_string_array(char** originalp, char** newp, int index){
 	char** original = originalp;
 	char** new = newp;
-	char** copy = malloc(sizeof(char*)*originalsize);
+	char** copy;
+	init_strptr(&copy, MAX_SIZE, MAX_SIZE);
 	int original_index = index;
 	int copy_index = 0;
 	for(; strcmp(original[index], ""); index++){
@@ -73,6 +74,7 @@ void insert_string_array(char** originalp, char** newp, int index, int originals
 		strcpy(original[index], copy[i]);
 		index++;	
 	}
+	free_strptr(&copy, MAX_SIZE);
 }
 
 int is_field(char* str) {
@@ -298,7 +300,6 @@ int save_config(config* cfg, char* filename){
 		} else {
 			strcpy(copy_word, cfg->words[i]);
 		}
-		printf(copy_word);
 		
 		if(fputs(copy_word, fp) == EOF){
 			perror("FAILED TO WRITE CONFIG TO ");
@@ -331,7 +332,7 @@ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
 		perror(full_field_name);
 		return 0;
 	}
-	char** fieldp = (cfg->words)+i; /* pointer to field for ease of use */
+	int findex = i; /* field index */
 	char* new_line;
 	init_str(&new_line, 2);
 	new_line[0] = cfg->eol;
@@ -339,20 +340,28 @@ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
 	int current_val  = 0;
 	int current_val_number = 0;
 	found = 0;
-	for(i = 0; strcmp(fieldp[i], "") && !is_field(fieldp[i]); i++) {
-		if(strcmp(fieldp[i], attr) == 0) {
+	for(i = 0; strcmp(cfg->words[i+findex], "") && !is_field(cfg->words[i+findex]); i++) {
+		if(strcmp(cfg->words[i+findex], attr) == 0) {
 			found = 1;
 			i+=1;
 			int curr_i = i;
 			int curr_new_val = 0;
-			for(; strcmp(fieldp[i], "") && strcmp(fieldp[i], new_line) && !is_field(fieldp[i]); i++) {
-				strcpy(fieldp[i], new_val[curr_new_val]);
+			int copying = 1;
+			for(; strcmp(cfg->words[i+findex], "") != 0 && strcmp(cfg->words[i+findex], new_line) != 0 && 
+							!is_field(cfg->words[i+findex]); i++) {
+				if(copying){
+					strcpy(cfg->words[i+findex], new_val[curr_new_val]);
+				} else{
+					strcpy(cfg->words[i+findex], " ");
+				}
 				curr_new_val++;
+				if(strcmp(new_val[curr_new_val], "") == 0){
+					copying = 0;
+				}
 			}
-			if(strcmp(new_val[curr_new_val], "")) { /* we need to insert values now! */
-				insert_string_array(fieldp, new_val+curr_new_val, i, MAX_SIZE, 50);
+			if(strcmp(new_val[curr_new_val], "")){ /* we need to insert words! */
+				insert_string_array(cfg->words, new_val+curr_new_val, findex+i);
 			}
-			i = curr_i;
 			current_val = 0;
 			current_val_number++;
 		}
@@ -366,7 +375,7 @@ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
 	free_str(&new_line);
 }
 
-/*TEST
+/* TEST CODE
 int main(){
 	config cfg;
 	auto_cfg_setup(&cfg);
@@ -395,15 +404,15 @@ int main(){
 	char** new_val;
 	init_strptr(&new_val, 4, 50);
 	new_val[0] = "10";
-	new_val[1] = "sad";
-	new_val[2] = "dad";
+	new_val[1] = "HELP";
 	set_field_attr(&cfg, "FIELD1", "MIN", new_val);
+	
+	printf("\n\nPRINTING WORDS\n\n");
 	for(int i = 0; strcmp(cfg.words[i], ""); i++) {
 		printf("%s ", cfg.words[i]);
 	}
-	
 	save_config(&cfg, "new.cfg");
-	printf("HELP");
 	free_strptr(&cfg.words, MAX_SIZE);
 	return 0;
-}*/
+}
+*/
