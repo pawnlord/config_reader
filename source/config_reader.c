@@ -3,25 +3,37 @@
 #include <stdlib.h>
 #include "../header/config_reader.h"
 
-void init_str(char** str, int dim){
+int init_str(char** str, int dim){
 	*str = malloc(sizeof(char)*dim);
-	
+	if(*str == NULL){
+		perror("config_reader: init_str");
+		return 0;
+	}
 	for(int i = 0; i < dim; i++){
 		(*str)[i] = 0;
 	}
-
+	return 1;
 }
 void free_str(char** str){
 	free(*str);
 }
-void init_strptr(char*** strptr, int dim1, int dim2) {
+int init_strptr(char*** strptr, int dim1, int dim2) {
 	*strptr = malloc(sizeof(char*)*dim1);
+	if(*strptr == NULL){
+		perror("config_reader: init_strptr");
+		return 0;
+	}
 	for(int i = 0; i < dim1; i++){
 		(*strptr)[i] = malloc(sizeof(char)*dim2);
+		if(*strptr[i] == NULL){
+			perror("config_reader: init_strptr");
+			return 0;
+		}
 		for(int j = 0; j < dim2; j++){
 			(*strptr)[i][j] = 0;
 		}
 	}
+	return 1;
 }
 void free_strptr(char*** strptr, int dim1){
 	for(int i = 0; i < dim1; i++){
@@ -30,18 +42,31 @@ void free_strptr(char*** strptr, int dim1){
 	free((*strptr));
 }
 
-void init_strptrptr(char**** strptrptr, int dim1, int dim2, int dim3){
+int init_strptrptr(char**** strptrptr, int dim1, int dim2, int dim3){
 	*strptrptr = malloc(sizeof(char**)*dim1);
+	if(*strptrptr == NULL){
+		perror("config_reader: init_strptrptr");
+		return 0;
+	}
 	for(int i = 0; i < dim1; i++){
 		(*strptrptr)[i] = malloc(sizeof(char*)*dim2);
+		if(*strptrptr[i] == NULL){
+			perror("config_reader: init_strptrptr");
+			return 0;
+		}
 		for(int j = 0; j < dim2; j++){
 			(*strptrptr)[i][j] = malloc(sizeof(char)*dim3);
+			if(*strptrptr[i][j] == NULL){
+				perror("config_reader: init_strptrptr");
+				return 0;
+			}
 			for(int k = 0; k < dim3; k++){
 					
 				(*strptrptr)[i][j][k] = 0;
 			}
 		}
 	}
+	return 1;
 }
 
 void free_strptrptr(char**** strptrptr, int dim1, int dim2){
@@ -95,6 +120,11 @@ int is_field(char* str) {
 int file_reader(char* filename, char* buffer) {
 	int ret;
 	FILE* fp = fopen(filename, "r");
+	if(fp == NULL){
+		printf("config_reader: file_reader: error getting file: %s\n", filename);
+		perror("config_reader: file_reader");
+		return 0;
+	}
 	char c = 0;
 	int i = 0;
 	c = fgetc((FILE*)fp);
@@ -107,13 +137,20 @@ int file_reader(char* filename, char* buffer) {
 	}
 	buffer[i] = 0;
 	fclose(fp);
+	return 1;
 }
 
 int config_reader(char* filename, config* cfg) {
 	char* buffer;
-	init_str(&buffer, 1000);
-	file_reader(filename, buffer);
-	init_strptr(&cfg->words, MAX_SIZE, MAX_SIZE);
+	if(!init_str(&buffer, 1000)){
+		return 0;
+	}
+	if(!file_reader(filename, buffer)){
+		return 0;
+	}
+	if(!init_strptr(&cfg->words, MAX_SIZE, MAX_SIZE)){
+		return 0;
+	}
 	int word_counter = 0;
 	int current_word = 0;
 	char* eol_str;
@@ -146,11 +183,14 @@ int config_reader(char* filename, config* cfg) {
 	current_word++;
 	free_str(&buffer);
 	free_str(&eol_str);
+	return 1;
 }
 
 int get_field(config cfg, char* field_name, char** field) {
 	char* full_field_name;
-	init_str(&full_field_name, 50);
+	if(!init_str(&full_field_name, 50)){
+			return 0;
+	}
 	strcat(full_field_name, "[");
 	strcat(full_field_name, field_name);
 	strcat(full_field_name, "]");
@@ -164,6 +204,7 @@ int get_field(config cfg, char* field_name, char** field) {
 		}
 	}
 	if(found == 0) {
+		printf("config_reader: get_field: failed to find field %s\n", full_field_name);
 		return 0;
 	}
 	int index = 0;
@@ -177,7 +218,9 @@ int get_field(config cfg, char* field_name, char** field) {
 
 int get_attr(config cfg, char** field, char* attr, char*** val) {
 	char* new_line;
-	init_str(&new_line, 2);
+	if(!init_str(&new_line, 2)){
+		return 0;
+	}
 	new_line[0] = cfg.eol;
 	int current_val  = 0;
 	int current_val_number = 0;
@@ -201,7 +244,9 @@ int get_attr(config cfg, char** field, char* attr, char*** val) {
 }
 int get_first_attr(config cfg, char** field, char* attr, char** val) {
 	char* new_line;
-	init_str(&new_line, 2);
+	if(!init_str(&new_line, 2)){
+		return 0;
+	}
 	new_line[0] = cfg.eol;
 	int current_val  = 0;
 	int found = 0;
@@ -222,7 +267,9 @@ int get_first_attr(config cfg, char** field, char* attr, char** val) {
 }
 int get_last_attr(config cfg, char** field, char* attr, char** val) {
 	char* new_line;
-	init_str(&new_line, 2);
+	if(!init_str(&new_line, 2)){
+		return 0;
+	}
 	new_line[0] = cfg.eol;
 	int current_val  = 0;
 	int found = 0;
@@ -247,25 +294,34 @@ int get_last_attr(config cfg, char** field, char* attr, char** val) {
 }
 int dir_get_attr(config cfg, char* fieldname, char* attr, char*** val) {
 	char** field;
-	init_strptr(&field, MAX_SIZE, MAX_SIZE);
+	if(!init_strptr(&field, MAX_SIZE, MAX_SIZE)){
+		return 0;
+	}
 	get_field(cfg, fieldname, field);
 	get_attr(cfg, field, attr, val);
 	free_strptr(&field, MAX_SIZE);
+	return 1;
 }
 
 int dir_get_first_attr(config cfg, char* fieldname, char* attr, char** val) {
 	char** field;
-	init_strptr(&field, MAX_SIZE, MAX_SIZE);
+	if(!init_strptr(&field, MAX_SIZE, MAX_SIZE)){
+		return 0;
+	}
 	get_field(cfg, fieldname, field);
 	get_first_attr(cfg, field, attr, val);
 	free_strptr(&field, MAX_SIZE);
+	return 1;
 }
 int dir_get_last_attr(config cfg, char* fieldname, char* attr, char** val) {
 	char** field;
-	init_strptr(&field, MAX_SIZE, MAX_SIZE);
+	if(!init_strptr(&field, MAX_SIZE, MAX_SIZE)){
+		return 0;
+	}
 	get_field(cfg, fieldname, field);
 	get_last_attr(cfg, field, attr, val);
 	free_strptr(&field, MAX_SIZE);
+	return 1;
 }
 
 void set_cfg_field(config* cfg, char begin, char end) {
@@ -302,8 +358,7 @@ int save_config(config* cfg, char* filename){
 		}
 		
 		if(fputs(copy_word, fp) == EOF){
-			perror("FAILED TO WRITE CONFIG TO ");
-			perror(filename);
+			printf("config_reader: save_config: failed to save to file %s", filename);
 			return 0;
 		}
 	}
@@ -328,8 +383,7 @@ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
 		}
 	}
 	if(found == 0) {
-		perror("COULD NOT FIND FIELD ");
-		perror(full_field_name);
+		printf("config_reader: set_field_attr: failed to find %s\n", full_field_name);
 		return 0;
 	}
 	int findex = i; /* field index */
@@ -366,16 +420,15 @@ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
 			current_val_number++;
 		}
 	}
-	if(found == 0){
-		perror("COULD NOT FIND VALUE IN ");
-		perror(full_field_name);
+	if(found == 0) {
+		printf("config_reader: set_field_attr: failed to find %s in field %s\n", attr, full_field_name);
 		return 0;
 	}
 	free_str(&full_field_name);
 	free_str(&new_line);
 }
 
-/* TEST CODE
+/* TEST CODE*/
 int main(){
 	config cfg;
 	auto_cfg_setup(&cfg);
@@ -415,4 +468,3 @@ int main(){
 	free_strptr(&cfg.words, MAX_SIZE);
 	return 0;
 }
-*/
