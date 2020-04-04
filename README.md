@@ -73,12 +73,15 @@ If you have edited it, there is a save_config function with syntax:
 int save_config(config* cfg, char* filename);
 ```  
 
+# errors  
+All errors are either 0 or 1  
+Here, 0 means failure and 1 means success  
+all functions that return int return an error  
+
 # reference sheet
 This is all functions for quick reference!
 This is pretty much what you will find in the header file.
 ```c
-int file_reader(char* filename, char* buffer);
-
 int config_reader(char* buffer, config* cfg);
 
 int get_field(config cfg, char* field_name, char** field); 

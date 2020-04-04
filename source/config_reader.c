@@ -240,6 +240,7 @@ int get_attr(config cfg, char** field, char* attr, char*** val) {
 		}
 	}
 	free_str(&new_line);
+	if(found == 0) {printf("config_reader: get_attr: failed to find %s\n", attr);}
 	return found;
 }
 int get_first_attr(config cfg, char** field, char* attr, char** val) {
@@ -263,6 +264,7 @@ int get_first_attr(config cfg, char** field, char* attr, char** val) {
 		}
 	}
 	free_str(&new_line);
+	if(found == 0) {printf("config_reader: get_attr: failed to find %s\n", attr);}
 	return found;
 }
 int get_last_attr(config cfg, char** field, char* attr, char** val) {
@@ -290,36 +292,31 @@ int get_last_attr(config cfg, char** field, char* attr, char** val) {
 		}
 	}
 	free_str(&new_line);
+	if(found == 0) {printf("config_reader: get_attr: failed to find %s\n", attr);}
 	return found;
 }
 int dir_get_attr(config cfg, char* fieldname, char* attr, char*** val) {
 	char** field;
-	if(!init_strptr(&field, MAX_SIZE, MAX_SIZE)){
-		return 0;
-	}
-	get_field(cfg, fieldname, field);
-	get_attr(cfg, field, attr, val);
+	if(!init_strptr(&field, MAX_SIZE, MAX_SIZE)) {return 0;}
+	if(!get_field(cfg, fieldname, field)) {return 0;}
+	if(!get_attr(cfg, field, attr, val)) {return 0;}
 	free_strptr(&field, MAX_SIZE);
 	return 1;
 }
 
 int dir_get_first_attr(config cfg, char* fieldname, char* attr, char** val) {
 	char** field;
-	if(!init_strptr(&field, MAX_SIZE, MAX_SIZE)){
-		return 0;
-	}
-	get_field(cfg, fieldname, field);
-	get_first_attr(cfg, field, attr, val);
+	if(!init_strptr(&field, MAX_SIZE, MAX_SIZE)) {return 0;}
+	if(!get_field(cfg, fieldname, field)) {return 0;}
+	if(!get_first_attr(cfg, field, attr, val)) {return 0;}
 	free_strptr(&field, MAX_SIZE);
 	return 1;
 }
 int dir_get_last_attr(config cfg, char* fieldname, char* attr, char** val) {
 	char** field;
-	if(!init_strptr(&field, MAX_SIZE, MAX_SIZE)){
-		return 0;
-	}
-	get_field(cfg, fieldname, field);
-	get_last_attr(cfg, field, attr, val);
+	if(!init_strptr(&field, MAX_SIZE, MAX_SIZE)) {return 0;}
+	if(!get_field(cfg, fieldname, field)) {return 0;}
+	if(!get_last_attr(cfg, field, attr, val)) {return 0;}
 	free_strptr(&field, MAX_SIZE);
 	return 1;
 }
@@ -347,7 +344,7 @@ void cfg_setup(config* cfg, char eol, char begin, char end) {
 int save_config(config* cfg, char* filename){
 	FILE* fp = fopen(filename, "w");
 	char* eol_str;
-	init_str(&eol_str, 2);
+	if(!init_str(&eol_str, 2)) {return 0;}
 	eol_str[0] = cfg->eol;
 	char* copy_word = malloc(MAX_SIZE*sizeof(char));
 	for(int i = 0; strcmp(cfg->words[i], ""); i++){
@@ -362,7 +359,7 @@ int save_config(config* cfg, char* filename){
 			return 0;
 		}
 	}
-	//free_str(&eol_str);
+	free_str(&eol_str);
 	fclose(fp);
 	return 1;
 }
@@ -426,9 +423,10 @@ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
 	}
 	free_str(&full_field_name);
 	free_str(&new_line);
+	return 1;
 }
 
-/* TEST CODE*/
+/* TEST CODE
 int main(){
 	config cfg;
 	auto_cfg_setup(&cfg);
@@ -467,4 +465,4 @@ int main(){
 	save_config(&cfg, "new.cfg");
 	free_strptr(&cfg.words, MAX_SIZE);
 	return 0;
-}
+} */
