@@ -62,12 +62,16 @@ dir_get_last_attr(cfg, field_name, attr_name, val);
 ```
   
 # config editing
-Currently, you must directly edit the config words if you want to edit it, but I will add functions for this soon!  
+This is, I would say, as simple as the last couple functions.  
+The currently only implemented feature is setting attributes, with syntax:
+ ```c
+ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val);
+ ```  
+This function will set all attributes in field `field_name` named `attr` to `new_val`.   
 If you have edited it, there is a save_config function with syntax:  
 ```c
-int save_config(config* cfg, char filename[]);
+int save_config(config* cfg, char* filename);
 ```  
-so, use that as you will  
 
 # reference sheet
 This is all functions for quick reference!
@@ -99,9 +103,9 @@ void auto_cfg_setup(config* cfg);
 
 int save_config(config* cfg, char* filename);
 
-/* Unimplemented, but coming! */
 int set_field_attr(config* cfg, char* fieldname, char* attrname, char** new_val);
 
+/* Unimplemented, but coming! */
 int set_field(config* cfg, char* fieldname, char** new_field);
 
 void set_cfg_field(config* cfg, char begin, char end); 
