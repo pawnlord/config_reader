@@ -60,6 +60,12 @@ dir_get_attr(cfg, field_name, attr_name, vals);`
 dir_get_first_attr(cfg, field_name, attr_name, val);
 dir_get_last_attr(cfg, field_name, attr_name, val);
 ```
+
+When you're done, close up the config! This is done with the close_config function.  
+```c
+int close_config(config* cfg, int save);
+```
+which takes in the config and whether or not you want to save. If save is 0, it does nothing and just closes the config. If save is 1, it saves the current config to whatever file you opened it with.   
   
 # config editing
 This is, I would say, as simple as the last couple functions.  
@@ -107,6 +113,8 @@ void auto_cfg_setup(config* cfg);
 int save_config(config* cfg, char* filename);
 
 int set_field_attr(config* cfg, char* fieldname, char* attrname, char** new_val);
+
+int close_config(config* cfg, int save);
 
 /* Unimplemented, but coming! */
 int set_field(config* cfg, char* fieldname, char** new_field);

@@ -435,7 +435,7 @@ int close_config(config* cfg, int save){
 	return 1;
 }
 
-/* TEST CODE*/
+/* TEST CODE
 int main(){
 	config cfg;
 	auto_cfg_setup(&cfg);
@@ -474,4 +474,4 @@ int main(){
 	save_config(&cfg, "new.cfg");
 	close_config(&cfg, 0);
 	return 0;
-} 
+} */
