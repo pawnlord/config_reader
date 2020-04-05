@@ -4,6 +4,7 @@
 typedef struct {
 	/* EOL is also a word, for easier reading */
 	char** words; 
+	char*  filename;
 	char   begin_field;
 	char   end_field;
 	char   eol;
@@ -53,5 +54,9 @@ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val);
 int set_field(config* cfg, char* field_name, char** new_field);
 
 int save_config(config* cfg, char* filename);
+
+/* destroy the config */
+int close_config(config* cfg, int save);
+
 
 #endif

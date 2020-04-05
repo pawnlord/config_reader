@@ -25,7 +25,7 @@ int init_strptr(char*** strptr, int dim1, int dim2) {
 	}
 	for(int i = 0; i < dim1; i++){
 		(*strptr)[i] = malloc(sizeof(char)*dim2);
-		if(*strptr[i] == NULL){
+		if((*strptr)[i] == NULL){
 			perror("config_reader: init_strptr");
 			return 0;
 		}
@@ -50,13 +50,13 @@ int init_strptrptr(char**** strptrptr, int dim1, int dim2, int dim3){
 	}
 	for(int i = 0; i < dim1; i++){
 		(*strptrptr)[i] = malloc(sizeof(char*)*dim2);
-		if(*strptrptr[i] == NULL){
+		if((*strptrptr)[i] == NULL){
 			perror("config_reader: init_strptrptr");
 			return 0;
 		}
 		for(int j = 0; j < dim2; j++){
 			(*strptrptr)[i][j] = malloc(sizeof(char)*dim3);
-			if(*strptrptr[i][j] == NULL){
+			if((*strptrptr)[i][j] == NULL){
 				perror("config_reader: init_strptrptr");
 				return 0;
 			}
@@ -142,14 +142,13 @@ int file_reader(char* filename, char* buffer) {
 
 int config_reader(char* filename, config* cfg) {
 	char* buffer;
-	if(!init_str(&buffer, 1000)){
-		return 0;
-	}
-	if(!file_reader(filename, buffer)){
-		return 0;
-	}
-	if(!init_strptr(&cfg->words, MAX_SIZE, MAX_SIZE)){
-		return 0;
+	if(!init_str(&buffer, 1000)) {return 0;}
+	if(!file_reader(filename, buffer)) {return 0;}
+	if(!init_strptr(&cfg->words, MAX_SIZE, MAX_SIZE)) {return 0;}
+	if(!init_str(&cfg->filename, MAX_SIZE)) {
+		printf("config_reader: config_reader: failed to save filename, continueing anyway\n");
+	} else {
+		strcpy(cfg->filename, filename);
 	}
 	int word_counter = 0;
 	int current_word = 0;
@@ -426,11 +425,21 @@ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
 	return 1;
 }
 
-/* TEST CODE
+int close_config(config* cfg, int save){
+	if(save){
+		if(!save_config(cfg, cfg->filename)) { return 0;}
+	}
+	free_strptr(&cfg->words, MAX_SIZE);
+	free_str(&cfg->filename);
+	free(cfg);
+	return 1;
+}
+
+/* TEST CODE*/
 int main(){
 	config cfg;
 	auto_cfg_setup(&cfg);
-	config_reader("config.cfg", &cfg);
+	printf("%d\n", config_reader("..\\example.cfg", &cfg));
 	char** field;
 	init_strptr(&field, MAX_SIZE, MAX_SIZE);
 	char*** val;
@@ -455,7 +464,7 @@ int main(){
 	char** new_val;
 	init_strptr(&new_val, 4, 50);
 	new_val[0] = "10";
-	new_val[1] = "HELP";
+	new_val[1] = "TEST";
 	set_field_attr(&cfg, "FIELD1", "MIN", new_val);
 	
 	printf("\n\nPRINTING WORDS\n\n");
@@ -463,6 +472,6 @@ int main(){
 		printf("%s ", cfg.words[i]);
 	}
 	save_config(&cfg, "new.cfg");
-	free_strptr(&cfg.words, MAX_SIZE);
+	close_config(&cfg, 0);
 	return 0;
-} */
+} 
