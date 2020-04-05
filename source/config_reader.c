@@ -102,16 +102,17 @@ void insert_string_array(char** originalp, char** newp, int index){
 	free_strptr(&copy, MAX_SIZE);
 }
 
-int is_field(char* str) {
+int is_field(char* str, char begin, char end) {
 	int last = 0;
-	if(str[0] != '[') {
+	if(str == NULL){return 0;}
+	if(str[0] != begin) {
 		return 0;
 	}
 	for(; str[last] != 0; last++){}
 	if(last == 1) {
 		return 0;
 	}
-	if(str[last-1] != ']') {
+	if(str[last-1] != end) {
 		return 0;
 	}
 	return 1;
@@ -187,14 +188,21 @@ int config_reader(char* filename, config* cfg) {
 
 int get_field(config cfg, char* field_name, char** field) {
 	char* full_field_name;
-	if(!init_str(&full_field_name, 50)){
-			return 0;
-	}
-	strcat(full_field_name, "[");
+	
+	if(!init_str(&full_field_name, 50)) {return 0;}
+	
+	char* field_char;
+	if(!init_str(&field_char, 2)) {return 0;}
+	
+	field_char[0] = cfg.begin_field;
+	strcat(full_field_name, field_char);
 	strcat(full_field_name, field_name);
-	strcat(full_field_name, "]");
+	field_char[0] = cfg.end_field;
+	strcat(full_field_name, field_char);
+	
 	int i = 0;
 	int found = 0;
+	
 	for(i = 0; strcmp(cfg.words[i], ""); i++) {
 		if(strcmp(cfg.words[i], full_field_name) == 0) {
 			i+=2; /* two to go down a line */
@@ -202,28 +210,31 @@ int get_field(config cfg, char* field_name, char** field) {
 			break;
 		}
 	}
+	
 	if(found == 0) {
 		printf("config_reader: get_field: failed to find field %s\n", full_field_name);
 		return 0;
 	}
+	
 	int index = 0;
-	for(; strcmp(cfg.words[i], "") && !is_field(cfg.words[i]); i++) {
+	for(; strcmp(cfg.words[i], "") && !is_field(cfg.words[i], cfg.begin_field, cfg.end_field); i++) {
 		strcpy(field[index], cfg.words[i]);
 		index++;
 	}
+	
 	free_str(&full_field_name);
 	return 1;
 }
 
 int get_attr(config cfg, char** field, char* attr, char*** val) {
 	char* new_line;
-	if(!init_str(&new_line, 2)){
-		return 0;
-	}
+	if(!init_str(&new_line, 2)) {return 0;}
+	
 	new_line[0] = cfg.eol;
 	int current_val  = 0;
 	int current_val_number = 0;
 	int found = 0;
+	
 	for(int i = 0; strcmp(field[i], ""); i++) {
 		if(strcmp(field[i], attr) == 0) {
 			found = 1;
@@ -238,18 +249,21 @@ int get_attr(config cfg, char** field, char* attr, char*** val) {
 			current_val_number++;
 		}
 	}
+	
 	free_str(&new_line);
+	
 	if(found == 0) {printf("config_reader: get_attr: failed to find %s\n", attr);}
+	
 	return found;
 }
 int get_first_attr(config cfg, char** field, char* attr, char** val) {
 	char* new_line;
-	if(!init_str(&new_line, 2)){
-		return 0;
-	}
+	if(!init_str(&new_line, 2)) {return 0;}
+	
 	new_line[0] = cfg.eol;
 	int current_val  = 0;
 	int found = 0;
+	
 	for(int i = 0; strcmp(field[i], ""); i++) {
 		if(strcmp(field[i], attr) == 0) {
 			found = 1;
@@ -262,18 +276,20 @@ int get_first_attr(config cfg, char** field, char* attr, char** val) {
 			break;
 		}
 	}
+	
 	free_str(&new_line);
+	
 	if(found == 0) {printf("config_reader: get_attr: failed to find %s\n", attr);}
 	return found;
 }
 int get_last_attr(config cfg, char** field, char* attr, char** val) {
 	char* new_line;
-	if(!init_str(&new_line, 2)){
-		return 0;
-	}
+	if(!init_str(&new_line, 2)) {return 0;}
+	
 	new_line[0] = cfg.eol;
 	int current_val  = 0;
 	int found = 0;
+	
 	for(int i = 0; strcmp(field[i], ""); i++) {
 		if(strcmp(field[i], attr) == 0) {
 			found = 1;
@@ -290,15 +306,19 @@ int get_last_attr(config cfg, char** field, char* attr, char** val) {
 			current_val = 0;
 		}
 	}
+	
 	free_str(&new_line);
+	
 	if(found == 0) {printf("config_reader: get_attr: failed to find %s\n", attr);}
 	return found;
 }
 int dir_get_attr(config cfg, char* fieldname, char* attr, char*** val) {
 	char** field;
 	if(!init_strptr(&field, MAX_SIZE, MAX_SIZE)) {return 0;}
+	
 	if(!get_field(cfg, fieldname, field)) {return 0;}
 	if(!get_attr(cfg, field, attr, val)) {return 0;}
+	
 	free_strptr(&field, MAX_SIZE);
 	return 1;
 }
@@ -306,16 +326,20 @@ int dir_get_attr(config cfg, char* fieldname, char* attr, char*** val) {
 int dir_get_first_attr(config cfg, char* fieldname, char* attr, char** val) {
 	char** field;
 	if(!init_strptr(&field, MAX_SIZE, MAX_SIZE)) {return 0;}
+	
 	if(!get_field(cfg, fieldname, field)) {return 0;}
 	if(!get_first_attr(cfg, field, attr, val)) {return 0;}
+	
 	free_strptr(&field, MAX_SIZE);
 	return 1;
 }
 int dir_get_last_attr(config cfg, char* fieldname, char* attr, char** val) {
 	char** field;
 	if(!init_strptr(&field, MAX_SIZE, MAX_SIZE)) {return 0;}
+	
 	if(!get_field(cfg, fieldname, field)) {return 0;}
 	if(!get_last_attr(cfg, field, attr, val)) {return 0;}
+	
 	free_strptr(&field, MAX_SIZE);
 	return 1;
 }
@@ -344,8 +368,10 @@ int save_config(config* cfg, char* filename){
 	FILE* fp = fopen(filename, "w");
 	char* eol_str;
 	if(!init_str(&eol_str, 2)) {return 0;}
+	
 	eol_str[0] = cfg->eol;
 	char* copy_word = malloc(MAX_SIZE*sizeof(char));
+	
 	for(int i = 0; strcmp(cfg->words[i], ""); i++){
 		if(strcmp(cfg->words[i], eol_str) != 0) {
 			strcat(strcpy(copy_word, cfg->words[i]), " ");
@@ -358,6 +384,7 @@ int save_config(config* cfg, char* filename){
 			return 0;
 		}
 	}
+	
 	free_str(&eol_str);
 	fclose(fp);
 	return 1;
@@ -365,12 +392,20 @@ int save_config(config* cfg, char* filename){
 
 int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
 	char* full_field_name = "";
-	init_str(&full_field_name, 50);
-	strcat(full_field_name, "[");
+	if(!init_str(&full_field_name, 50)) {return 0;}
+	
+	char* field_char;
+	if(!init_str(&field_char, 2)) {return 0;}
+	
+	field_char[0] = cfg->begin_field;
+	strcat(full_field_name, field_char);
 	strcat(full_field_name, field_name);
-	strcat(full_field_name, "]");
+	field_char[0] = cfg->end_field;
+	strcat(full_field_name, field_char);
+	
 	int i = 0;
 	int found = 0;
+	
 	for(i = 0; strcmp(cfg->words[i], ""); i++) {
 		if(strcmp(cfg->words[i], full_field_name) == 0) {
 			i+=2; /* two to go down a line */
@@ -382,15 +417,17 @@ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
 		printf("config_reader: set_field_attr: failed to find %s\n", full_field_name);
 		return 0;
 	}
+	
 	int findex = i; /* field index */
 	char* new_line;
-	init_str(&new_line, 2);
+	if(!init_str(&new_line, 2)) {return 0;}
 	new_line[0] = cfg->eol;
 	new_line[1] = 0;
 	int current_val  = 0;
 	int current_val_number = 0;
 	found = 0;
-	for(i = 0; strcmp(cfg->words[i+findex], "") && !is_field(cfg->words[i+findex]); i++) {
+	
+	for(i = 0; strcmp(cfg->words[i+findex], "") && !is_field(cfg->words[i+findex], cfg->begin_field, cfg->end_field); i++) {
 		if(strcmp(cfg->words[i+findex], attr) == 0) {
 			found = 1;
 			i+=1;
@@ -398,7 +435,7 @@ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
 			int curr_new_val = 0;
 			int copying = 1;
 			for(; strcmp(cfg->words[i+findex], "") != 0 && strcmp(cfg->words[i+findex], new_line) != 0 && 
-							!is_field(cfg->words[i+findex]); i++) {
+							!is_field(cfg->words[i+findex], cfg->begin_field, cfg->end_field); i++) {
 				if(copying){
 					strcpy(cfg->words[i+findex], new_val[curr_new_val]);
 				} else{
@@ -416,10 +453,12 @@ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
 			current_val_number++;
 		}
 	}
+	
 	if(found == 0) {
 		printf("config_reader: set_field_attr: failed to find %s in field %s\n", attr, full_field_name);
 		return 0;
 	}
+	
 	free_str(&full_field_name);
 	free_str(&new_line);
 	return 1;
@@ -427,18 +466,72 @@ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
 
 int close_config(config* cfg, int save){
 	if(save){
-		if(!save_config(cfg, cfg->filename)) { return 0;}
+		if(!save_config(cfg, cfg->filename)) {return 0;}
 	}
+	
 	free_strptr(&cfg->words, MAX_SIZE);
 	free_str(&cfg->filename);
 	free(cfg);
 	return 1;
 }
 
-/* TEST CODE
+int set_field(config* cfg, char* field_name, char** new_field){
+	char* full_field_name = "";
+	if(!init_str(&full_field_name, 50)) {return 0;}
+	
+	char* field_char;
+	if(!init_str(&field_char, 2)) {return 0;}
+	
+	field_char[0] = cfg->begin_field;
+	strcat(full_field_name, field_char);
+	strcat(full_field_name, field_name);
+	field_char[0] = cfg->end_field;
+	strcat(full_field_name, field_char);
+	
+	int i = 0;
+	int found = 0;
+	
+	for(i = 0; strcmp(cfg->words[i], ""); i++) {
+		if(strcmp(cfg->words[i], full_field_name) == 0) {
+			i+=2; /* two to go down a line */
+			found = 1;
+			break;
+		}
+	}
+	
+	if(found == 0) {
+		printf("config_reader: set_field_attr: failed to find %s\n", full_field_name);
+		return 0;
+	}
+	
+	int findex = i; /* field index */
+	
+	char* new_line;
+	init_str(&new_line, 2);
+	new_line[0] = cfg->eol;
+	new_line[1] = 0;
+	found = 0;
+	
+	for(i = 0; strcmp(cfg->words[i+findex], "") && !is_field(cfg->words[i+findex], cfg->begin_field, cfg->end_field)
+			&& strcmp(new_field[i], ""); i++){
+		cfg->words[i+findex] = new_field[i];
+	}
+	
+	if(strcmp(new_field[i], "")) {
+		insert_string_array(cfg->words, new_field+i, i+findex);
+	}
+	
+	free_str(&full_field_name);
+	free_str(&new_line);
+	return 1;
+
+}
+
+
+/* TEST CODE 
 int main(){
 	config cfg;
-	auto_cfg_setup(&cfg);
+	cfg_setup(&cfg, '\n', '{', '}');
 	printf("%d\n", config_reader("..\\example.cfg", &cfg));
 	char** field;
 	init_strptr(&field, MAX_SIZE, MAX_SIZE);
@@ -461,12 +554,18 @@ int main(){
 		}
 		printf("\n");
 	}
-	char** new_val;
-	init_strptr(&new_val, 4, 50);
-	new_val[0] = "10";
-	new_val[1] = "TEST";
-	set_field_attr(&cfg, "FIELD1", "MIN", new_val);
+	field[0] = "test";
+	field[1] = "\n";
+	field[2] = "for";
+	field[3] = "\n";
+	field[4] = "field";
+	field[5] = "change";
 	
+	printf("FIELD1: \n");
+	for(int i = 0; strcmp(field[i], ""); i++) {
+		printf("%s ", field[i]);
+	}
+	set_field(&cfg, "FIELD2", field);
 	printf("\n\nPRINTING WORDS\n\n");
 	for(int i = 0; strcmp(cfg.words[i], ""); i++) {
 		printf("%s ", cfg.words[i]);

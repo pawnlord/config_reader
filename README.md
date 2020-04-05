@@ -26,7 +26,7 @@ MONEY 1234.56
 CURRENCY Euro
 ```
 
-## code
+## reading
 The code I would say is a bit more tricky.  
 First, you have to make a config struct and setup  
 ```c  
@@ -67,22 +67,29 @@ int close_config(config* cfg, int save);
 ```
 which takes in the config and whether or not you want to save. If save is 0, it does nothing and just closes the config. If save is 1, it saves the current config to whatever file you opened it with.   
   
-# config editing
+## editing
 This is, I would say, as simple as the last couple functions.  
 The currently only implemented feature is setting attributes, with syntax:
- ```c
- int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val);
- ```  
-This function will set all attributes in field `field_name` named `attr` to `new_val`.   
+```c
+int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val);
+```  
+This function will set all attributes in field `field_name` named `attr` to `new_val`.  
+
+If instead you need to directly edit your own field, use the set_field function.  
+```c
+int set_field(config* cfg, char* field_name, char** new_field);
+``` 
+This directly sets field `field_name` to `new_field`.  
+  
 If you have edited it, there is a save_config function with syntax:  
 ```c
 int save_config(config* cfg, char* filename);
 ```  
 
-# errors  
-All errors are either 0 or 1  
+## errors  
+All errors are either 0 or 1.  
 Here, 0 means failure and 1 means success  
-all functions that return int return an error  
+All functions that return int return an error  
 
 # reference sheet
 This is all functions for quick reference!
@@ -104,6 +111,8 @@ int dir_get_first_attr(config cfg, char* fieldname, char* attr, char** val);
 
 int dir_get_last_attr(config cfg, char* fieldname, char* attr, char** val);
 
+void set_cfg_field(config* cfg, char begin, char end); 
+
 void set_cfg_eol(config* cfg, char eol);
 
 void cfg_setup(config* cfg, char eol, char begin, char end);
@@ -116,9 +125,6 @@ int set_field_attr(config* cfg, char* fieldname, char* attrname, char** new_val)
 
 int close_config(config* cfg, int save);
 
-/* Unimplemented, but coming! */
 int set_field(config* cfg, char* fieldname, char** new_field);
-
-void set_cfg_field(config* cfg, char begin, char end); 
 
 ```

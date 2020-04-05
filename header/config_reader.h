@@ -5,12 +5,12 @@ typedef struct {
 	/* EOL is also a word, for easier reading */
 	char** words; 
 	char*  filename;
-	char   begin_field;
-	char   end_field;
+	char  begin_field;
+	char  end_field;
 	char   eol;
 } config;
 
-int is_field(char* str);
+int is_field(char* str, char begin, char end);
 
 /* reads the file into buffer (ONLY USED IN CONFIG READER)*/
 int file_reader(char* filename, char* buffer);
