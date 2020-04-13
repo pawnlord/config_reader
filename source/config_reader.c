@@ -234,9 +234,13 @@ int get_attr(config cfg, char** field, char* attr, char*** val) {
 	int current_val  = 0;
 	int current_val_number = 0;
 	int found = 0;
+	int after_nl = 0;
 	
 	for(int i = 0; strcmp(field[i], ""); i++) {
-		if(strcmp(field[i], attr) == 0) {
+		if(strcmp(field[i], new_line) == 0) {
+			after_nl = 1;
+		} 
+		if(strcmp(field[i], attr) == 0 && after_nl) {
 			found = 1;
 			i+=1;
 			int curr_i = i;
@@ -248,6 +252,9 @@ int get_attr(config cfg, char** field, char* attr, char*** val) {
 			current_val = 0;
 			current_val_number++;
 		}
+		if(strcmp(field[i], new_line)) {
+			after_nl = 0;
+		} 
 	}
 	
 	free_str(&new_line);
@@ -263,9 +270,13 @@ int get_first_attr(config cfg, char** field, char* attr, char** val) {
 	new_line[0] = cfg.eol;
 	int current_val  = 0;
 	int found = 0;
+	int after_nl = 0;
 	
 	for(int i = 0; strcmp(field[i], ""); i++) {
-		if(strcmp(field[i], attr) == 0) {
+		if(strcmp(field[i], new_line) == 0) {
+			after_nl = 1;
+		} 
+		if(strcmp(field[i], attr) == 0 && after_nl) {
 			found = 1;
 			i+=1;
 			int curr_i = i;
@@ -275,6 +286,9 @@ int get_first_attr(config cfg, char** field, char* attr, char** val) {
 			}
 			break;
 		}
+		if(strcmp(field[i], new_line)) {
+			after_nl = 0;
+		} 
 	}
 	
 	free_str(&new_line);
@@ -289,9 +303,13 @@ int get_last_attr(config cfg, char** field, char* attr, char** val) {
 	new_line[0] = cfg.eol;
 	int current_val  = 0;
 	int found = 0;
+	int after_nl = 0;
 	
 	for(int i = 0; strcmp(field[i], ""); i++) {
-		if(strcmp(field[i], attr) == 0) {
+		if(strcmp(field[i], new_line) == 0) {
+			after_nl = 1;
+		} 
+		if(strcmp(field[i], attr) == 0 && after_nl) {
 			found = 1;
 			i+=1;
 			int curr_i = i;
@@ -305,6 +323,9 @@ int get_last_attr(config cfg, char** field, char* attr, char** val) {
 			i = curr_i;
 			current_val = 0;
 		}
+		if(strcmp(field[i], new_line)) {
+			after_nl = 0;
+		} 
 	}
 	
 	free_str(&new_line);
@@ -426,8 +447,12 @@ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
 	int current_val  = 0;
 	int current_val_number = 0;
 	found = 0;
+	int after_nl = 0;
 	
 	for(i = 0; strcmp(cfg->words[i+findex], "") && !is_field(cfg->words[i+findex], cfg->begin_field, cfg->end_field); i++) {
+		if(strcmp(cfg->words[i+findex], new_line) == 0) {
+			after_nl = 1;
+		} 
 		if(strcmp(cfg->words[i+findex], attr) == 0) {
 			found = 1;
 			i+=1;
@@ -452,6 +477,9 @@ int set_field_attr(config* cfg, char* field_name, char* attr, char** new_val) {
 			current_val = 0;
 			current_val_number++;
 		}
+		if(strcmp(cfg->words[i+findex], new_line)) {
+			after_nl = 0;
+		} 
 	}
 	
 	if(found == 0) {
@@ -531,7 +559,7 @@ int set_field(config* cfg, char* field_name, char** new_field){
 /* TEST CODE 
 int main(){
 	config cfg;
-	cfg_setup(&cfg, '\n', '{', '}');
+	cfg_setup(&cfg, '\n', '[', ']');
 	printf("%d\n", config_reader("..\\example.cfg", &cfg));
 	char** field;
 	init_strptr(&field, MAX_SIZE, MAX_SIZE);
@@ -547,12 +575,9 @@ int main(){
 		printf("%s ", field[i]);
 	}
 	printf("attr MIN: \n");
-	dir_get_attr(cfg, "FIELD1", "MIN", val);
-	for(int i = 0; strcmp(val[i][0], ""); i++) {
-		for(int j = 0; strcmp(val[i][j], ""); j++) {
-			printf("%d: %s ", j, val[i][j]);
-		}
-		printf("\n");
+	dir_get_last_attr(cfg, "FIELD1", "TEST", lval);
+	for(int i = 0; strcmp(lval[i], ""); i++) {
+		printf("%d: %s ", i, lval[i]);
 	}
 	field[0] = "test";
 	field[1] = "\n";
